@@ -1,0 +1,26 @@
+* {
+    padding: 0px;
+    margin: 0px;
+    box-sizing: border-box;
+    background-color: slategrey;
+}
+
+.sudoku-holder {
+    width: 50vh;
+    height: 50vh;
+}
+
+.container-9x9 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    border-color: black;
+    border-width: 1px;
+    border-style: solid;
+}
+
+.sudoku-small-square {
+    border-color: black;
+    border-width: 1px;
+    border-style: solid;
+}
