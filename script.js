@@ -5,6 +5,29 @@ var KNtoggled = false;
 var currentSelectedSq = null;
 
 
+var knBtn = document.getElementById("toggleKN");
+var writeBtn = document.getElementById("write");
+var noteBtn = document.getElementById("note");
+knBtn.addEventListener("change", function (ev){
+    KNtoggled = ev.currentTarget.checked;
+    if (currentMode == "NOTE") {
+        writeBtn.checked = true;
+        currentMode = "WRITE";
+    }
+});
+knBtn.checked = false;
+writeBtn.checked = true;
+writeBtn.addEventListener("click", function() {
+    currentMode = "WRITE";
+});
+noteBtn.addEventListener("click", function() {
+    currentMode = "NOTE";
+    if (KNtoggled) {
+        knBtn.checked = false;
+        KNtoggled = false;
+    }
+});
+
 var squares = document.getElementsByClassName("sudoku-small-square");
 for (let index = 0; index < squares.length; index++) {
     const square = squares[index];
@@ -104,6 +127,52 @@ document.getElementById("eraseBtn").addEventListener('click', function (){
 });
 
 
+function checkForVictory() {
+    // Square Check
+    let squares = document.querySelectorAll(".sudoku-big-square");
+    squares.forEach(square => {
+        let txt = square.innerText.replaceAll("\n", "");
+        for (let i = 1; i <= 9; i++) {
+            if (!txt.includes(`${i}`)) {
+                console.log("square check sq", square);
+                return false;
+            }
+        }
+    });
+
+    // H check 
+    for (let y = 0; y < 9; y++) {
+        let line = "";
+        for (let x = 0; x < 9; x++) {
+            let sq = document.getElementById(`sq${x}x${y}`);
+            line += sq.innerText;
+        }
+        for (let i = 1; i <= 9; i++) {
+            if (!line.includes(`${i}`)) {
+                console.log("H check at", y);
+                return false;
+            }
+        }  
+    } 
+    
+    // V check 
+    for (let x = 0; x < 9; x++) {
+        let line = "";
+        for (let y = 0; y < 9; y++) {
+            let sq = document.getElementById(`sq${x}x${y}`);
+            line += sq.innerText;
+        }
+        for (let i = 1; i <= 9; i++) {
+            if (!line.includes(`${i}`)) {
+                console.log("V check at", x);
+                return false;
+            }
+        }  
+    } 
+
+    return true;
+}
+
 function updateNumberCount() {
     numbersCount.fill(9, 0, 9);
     for (let x = 0; x < 9; x++) {
@@ -115,11 +184,20 @@ function updateNumberCount() {
         }
     }
 
+    let checkSolved = true;
+
     for (let index = 0; index < 9; index++) {
         const element = numbersCount[index];
         let indicator = document.getElementById(`count_nb_${index+1}`);
         indicator.innerText = element;
+        if (numbersCount[index] != 0) checkSolved = false;
     }
+
+
+    if (checkSolved) {
+        if (checkForVictory()) alert("YOU WON!!!!!");
+    }
+
 }
 
 function updateSquare(x, y, value) {
@@ -128,12 +206,42 @@ function updateSquare(x, y, value) {
 
     switch (currentMode) {
         case "WRITE":
+            if (sq.classList.contains("known-number") && !KNtoggled) break;
+
             if (value == 0) {
                 sq.innerHTML = '';
+                sq.classList.remove("known-number");
             } else {
                 sq.innerHTML = value;
+                if (KNtoggled) {
+                    sq.classList.add("known-number");
+                }
             }
+            sq.classList.remove("note-holder");
+            
             updateNumberCount();
+            break;
+        case "NOTE":
+            if (sq.classList.contains("known-number") && !KNtoggled) break;
+
+            if (value == 0 || !sq.innerHTML.includes("<p>")) {
+                sq.classList.add("note-holder");
+                sq.innerHTML = "<p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p>"
+            }
+
+            if (KNtoggled) break;
+
+            if (value) {
+                if (sq.innerHTML[3+(value-1)*8] !== `${value}`) {
+                    sq.innerHTML = sq.innerHTML.slice(0, 3+(value-1)*8) + `${value}`
+                        + sq.innerHTML.slice(4+(value-1)*8, sq.innerHTML.length) ;
+                } else {
+                    sq.innerHTML = sq.innerHTML.slice(0, 3+(value-1)*8) + " "
+                        + sq.innerHTML.slice(4+(value-1)*8, sq.innerHTML.length) ;
+                }
+            }
+            
+
             break;
         default:
             break;
@@ -141,10 +249,30 @@ function updateSquare(x, y, value) {
 }
 
 function resetAll() {
-    numbersCount.fill(9, 9);
+    for (let x = 0; x < 9; x++) {
+        for (let y = 1; y < 9; y++) {
+            let sq = document.getElementById(`sq${x}x${y}`);
+            sq.classList.remove("known-number");
+            sq.innerHTML = "";
+        }
+    }
+    updateNumberCount();
+}
+
+function restart() {
+    for (let x = 0; x < 9; x++) {
+        for (let y = 0; y < 9; y++) {
+            let sq = document.getElementById(`sq${x}x${y}`);
+            if (sq.classList.contains("known-number")) continue;
+            sq.innerHTML = "";
+        }
+    }
+    updateNumberCount();
 }
 
 
+document.getElementById("resetBtn").addEventListener("click", resetAll);
+document.getElementById("restartBtn").addEventListener("click", restart);
 
 
 resetAll();

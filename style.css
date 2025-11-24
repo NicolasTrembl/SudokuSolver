@@ -27,6 +27,10 @@ body {
     border-color: black;
     border-width: 1px;
     border-style: solid;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
 }
 
 .command-panel {
@@ -66,4 +70,16 @@ body {
     border-color: snow;
     border-width: 2px;
     border-style: dashed;
+}
+
+.known-number {
+    background-color: beige;
+}
+
+.note-holder {
+    font-size: x-small;
+    text-align: center;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
 }
