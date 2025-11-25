@@ -176,7 +176,7 @@ function checkForVictory() {
 function updateNumberCount() {
     numbersCount.fill(9, 0, 9);
     for (let x = 0; x < 9; x++) {
-        for (let y = 1; y < 9; y++) {
+        for (let y = 0; y < 9; y++) {
             let square = document.getElementById(`sq${x}x${y}`);
             if (square.innerHTML.length == 1) {
                 numbersCount[parseInt(square.innerHTML)-1]--;
@@ -250,7 +250,7 @@ function updateSquare(x, y, value) {
 
 function resetAll() {
     for (let x = 0; x < 9; x++) {
-        for (let y = 1; y < 9; y++) {
+        for (let y = 0; y < 9; y++) {
             let sq = document.getElementById(`sq${x}x${y}`);
             sq.classList.remove("known-number");
             sq.innerHTML = "";
@@ -273,6 +273,208 @@ function restart() {
 
 document.getElementById("resetBtn").addEventListener("click", resetAll);
 document.getElementById("restartBtn").addEventListener("click", restart);
+
+function updateSquaresSolve(knlist) {
+    knlist.forEach(sq => {
+        let pos = sq.id.slice(2).split("x");
+        // Update square
+        for (let x = 0; x < 9; x += 3) {
+            for (let y = 0; y < 9; y += 3) {
+                if (x <= pos[0] && pos[0] <= x + 2 && y <= pos[1] && pos[1] <= y + 2) {
+                    for (let x_ = x; x_ <= x + 2; x_++) {
+                        for (let y_ = y; y_ <= y + 2; y_++) {
+                            if (x_ == pos[0] && y_ == pos[1]) continue;
+                            let square = document.getElementById(`sq${x_}x${y_}`);
+                            square.innerHTML = square.innerHTML.replaceAll(sq.innerText, ' ');
+                        }
+                    }
+                }
+
+            }
+        }
+
+        // Update H line
+        for (let x = 0; x < 9; x++) {
+            if (x == pos[0]) continue;
+            let square = document.getElementById(`sq${x}x${pos[1]}`);
+            square.innerHTML = square.innerHTML.replaceAll(sq.innerText, ' ');
+        }
+        
+        // Update V line
+        for (let y = 0; y < 9; y++) {
+            if (y == pos[1]) continue;
+            let square = document.getElementById(`sq${pos[0]}x${y}`);
+            square.innerHTML = square.innerHTML.replaceAll(sq.innerText, ' ');
+        }
+    });
+    
+    for (let x = 0; x < 9; x++) {
+        for (let y = 0; y < 9; y++) {
+            let sq = document.getElementById(`sq${x}x${y}`);
+            if (sq.classList.contains("known-number")) {
+                continue;
+            }
+            if (sq.innerText.length == 1) {
+                sq.innerHTML = sq.innerText;
+                sq.classList.remove("note-holder");
+            }
+        }
+    }
+}
+
+function searchForOnlyOptionSolve() {
+    // Squares
+    for (let x = 0; x < 9; x += 3) {
+        for (let y = 0; y < 9; y += 3) {
+            let nmbCount = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+            let foundSq = [null, null, null, null, null, null, null, null, null];
+            for (let x_ = x; x_ < x + 3; x_++) {
+                for (let y_ = y; y_ < y + 3; y_++) {
+                    let sq = document.getElementById(`sq${x_}x${y_}`);
+                    if (sq.classList.contains("note-holder")) {
+                        let numbs = sq.innerText.split("").map((e) => parseInt(e));
+                        numbs.forEach(function (n) {
+                            nmbCount[n-1]++;
+                            foundSq[n-1] = sq;
+                        });
+                    } else {
+                        nmbCount[parseInt(sq.innerText) - 1]++;
+                    }
+                }
+            }
+
+            for (let i = 0; i < 9; i++) {
+                if (nmbCount[i] == 1) {
+                    if (foundSq[i] == null) continue;
+                    foundSq[i].innerHTML = i+1;
+                    foundSq[i].classList.remove("note-holder");
+                }
+            }
+            
+        }
+    }
+
+    for (let x = 0; x < 9; x += 1) {
+        let nmbCount = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+        let foundSq = [null, null, null, null, null, null, null, null, null];
+        for (let y = 0; y < 9; y += 1) {
+            let sq = document.getElementById(`sq${x}x${y}`);
+            if (sq.classList.contains("note-holder")) {
+                let numbs = sq.innerText.split("").map((e) => parseInt(e));
+                numbs.forEach(function (n) {
+                    nmbCount[n-1]++;
+                    foundSq[n-1] = sq;
+                });
+            } else {
+                nmbCount[parseInt(sq.innerText) - 1]++;
+            }
+
+        }
+        for (let i = 0; i < 9; i++) {
+            if (nmbCount[i] == 1) { 
+                if (foundSq[i] == null) continue;
+                foundSq[i].innerHTML = i+1;
+                foundSq[i].classList.remove("note-holder");
+            }
+        }
+    }
+
+    
+    for (let y = 0; y < 9; y += 1) {
+        let nmbCount = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+        let foundSq = [null, null, null, null, null, null, null, null, null];
+        for (let x = 0; x < 9; x += 1) {
+            let sq = document.getElementById(`sq${x}x${y}`);
+            if (sq.classList.contains("note-holder")) {
+                let numbs = sq.innerText.split("").map((e) => parseInt(e));
+                numbs.forEach(function (n) {
+                    nmbCount[n-1]++;
+                    foundSq[n-1] = sq;
+                });
+            } else {
+                nmbCount[parseInt(sq.innerText) - 1]++;
+            }
+
+        }
+        for (let i = 0; i < 9; i++) {
+            if (nmbCount[i] == 1) {
+                if (foundSq[i] == null) continue;
+                foundSq[i].innerHTML = i+1;
+                foundSq[i].classList.remove("note-holder");
+            }
+        }
+    }
+    
+
+}
+
+function solve() {
+    let knlist = [];
+
+    for (let x = 0; x < 9; x++) {
+        for (let y = 0; y < 9; y++) {
+            let sq = document.getElementById(`sq${x}x${y}`);
+            if (sq.classList.contains("known-number")) {
+                knlist.push(sq);
+                continue;
+            }
+            sq.classList.add("note-holder")
+            sq.innerHTML = "<p>1</p><p>2</p><p>3</p><p>4</p><p>5</p><p>6</p><p>7</p><p>8</p><p>9</p>"
+        }
+    }
+
+    while (knlist.length != 9*9) {
+        let prevlength = knlist.length; 
+        updateSquaresSolve(knlist);
+        
+        // if only one option in square or v/h line select it
+        searchForOnlyOptionSolve()
+    
+        knlist = [];
+        for (let x = 0; x < 9; x++) {
+            for (let y = 0; y < 9; y++) {
+                let sq = document.getElementById(`sq${x}x${y}`);
+                if (!sq.classList.contains("note-holder")) knlist.push(sq);
+            }
+        }
+        
+        if (prevlength == knlist.length) {
+            // No Sure Number Guess
+            // Search for lowest entropy
+            let min = 10; let minSq;
+            for (let x = 0; x < 9; x++) {
+                for (let y = 0; y < 9; y++) {
+                    let sq = document.getElementById(`sq${x}x${y}`);
+                    if (!sq.classList.contains("note-holder")) continue;
+                    if (sq.innerText.length < min) {
+                        min = sq.innerText.length;
+                        minSq = sq;
+                    }
+                }
+            }
+            if (!minSq != null) {
+                console.table(knlist);
+                console.log(min);
+                alert("Error");
+                return;
+            }
+            console.log(minSq);
+            minSq.innerHTML = minSq.innerText.split("")[Math.floor(Math.random() * min)];
+            minSq.classList.remove("note-holder");
+        }
+
+        
+        updateNumberCount();
+        
+    }
+
+}
+
+
+
+
+
+document.getElementById("solveBtn").addEventListener("click", solve);
 
 
 resetAll();
