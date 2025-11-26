@@ -10,6 +10,7 @@ body {
 }
 
 .sudoku-holder {
+    margin: 5px;
     width: 50vh;
     height: 50vh;
 }
@@ -36,6 +37,10 @@ body {
 .command-panel {
     display: flex;
     flex-direction: row;
+    justify-content: stretch;
+    align-items: center;
+    height: 30vh;
+    width: 100vw;
 }
 
 .numpad {
@@ -56,6 +61,7 @@ body {
     flex-direction: column;
     justify-content: center;
     cursor: pointer;
+    margin: 2px;
 }
 
 .number-display > *:first-child {
@@ -83,3 +89,113 @@ body {
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr 1fr 1fr;
 }
+
+.numpad-panel {
+    display: flex;
+    flex-direction: row;
+    width: 66%;
+    justify-content: space-evenly;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    height: 100vh;
+}
+
+.command-select-option {
+    display: none;
+}
+
+
+.panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-radius: 16px;
+    border-color: black;
+    border-width: 1px;
+    border-style: solid;
+    padding: 16px;
+    height: 80%;
+}
+
+.mode-panel {
+    /* width: 35vw; */
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    border-radius: 16px;
+    border-color: black;
+    border-width: 1px;
+    border-style: solid;
+    justify-content: space-between;
+
+
+}
+
+
+input[type="button"] {
+    background-color: transparent;
+    border-radius: 8px;
+    border-color: black;
+    border-width: 1px;
+    border-style: solid;
+    padding: 4px;
+    width: 100%;
+}
+
+/* ONLY IF SMARTPHONE */
+@media screen and (max-width: 768px) {
+
+        
+    .sudoku-holder {
+        width: 98vw;
+        height: 98vw;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .command-select {
+        display: flex;
+        flex-direction: row;
+        width: 80vw;
+        justify-content: space-evenly;
+    }
+
+    .command-select-option {
+        display: block;
+        border-radius: 100px;
+        border-color: black;
+        border-width: 1px;
+        border-style: solid;
+        padding: 8px;
+        cursor: pointer;
+    }
+
+    .selected {
+        border-color: snow;
+        border-width: 2px;
+        border-style: dashed;   
+    }
+
+    .panel {
+        width: 80vw;
+    }
+
+    .numpad-panel {
+        justify-content: space-evenly;
+        width: 100vw;
+
+    }
+
+    .command-panel {
+        justify-content: center;
+    }
+
+}
+

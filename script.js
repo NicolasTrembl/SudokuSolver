@@ -1,8 +1,31 @@
 var numbersCount = [9, 9, 9, 9, 9, 9, 9, 9, 9];
+var historyList = [];
 var currentMode = "WRITE";
 var currentSelectedNB = -1;
 var KNtoggled = false;
 var currentSelectedSq = null;
+
+var csoNumb = document.getElementById("cso-numb");
+var csoSolv = document.getElementById("cso-solv");
+
+var numpadDisplay = document.getElementById("numpad-panel");
+var solveDisplay = document.getElementById("solve-p");
+
+
+function selectedCommand(selectedBtn, selectedDisplay) {
+    csoNumb.classList.remove("selected");
+    csoSolv.classList.remove("selected");
+
+    selectedBtn.classList.add("selected");
+
+    numpadDisplay.classList.add("hidden");
+    solveDisplay.classList.add("hidden");
+
+    selectedDisplay.classList.remove("hidden");
+}
+
+csoNumb.addEventListener("click",() => selectedCommand(csoNumb, numpadDisplay));
+csoSolv.addEventListener("click",() => selectedCommand(csoSolv, solveDisplay));
 
 
 var knBtn = document.getElementById("toggleKN");
@@ -134,7 +157,7 @@ function checkForVictory() {
         let txt = square.innerText.replaceAll("\n", "");
         for (let i = 1; i <= 9; i++) {
             if (!txt.includes(`${i}`)) {
-                console.log("square check sq", square);
+                // console.log("square check sq", square);
                 return false;
             }
         }
@@ -149,7 +172,7 @@ function checkForVictory() {
         }
         for (let i = 1; i <= 9; i++) {
             if (!line.includes(`${i}`)) {
-                console.log("H check at", y);
+                // console.log("H check at", y);
                 return false;
             }
         }  
@@ -164,7 +187,7 @@ function checkForVictory() {
         }
         for (let i = 1; i <= 9; i++) {
             if (!line.includes(`${i}`)) {
-                console.log("V check at", x);
+                // console.log("V check at", x);
                 return false;
             }
         }  
@@ -195,7 +218,7 @@ function updateNumberCount() {
 
 
     if (checkSolved) {
-        if (checkForVictory()) alert("YOU WON!!!!!");
+        if (checkForVictory()) document.body.style.backgroundColor = "green";
     }
 
 }
@@ -256,6 +279,7 @@ function resetAll() {
             sq.innerHTML = "";
         }
     }
+    document.body.style.backgroundColor = "slategrey";
     updateNumberCount();
 }
 
@@ -267,6 +291,7 @@ function restart() {
             sq.innerHTML = "";
         }
     }
+    document.body.style.backgroundColor = "slategrey";
     updateNumberCount();
 }
 
@@ -315,6 +340,7 @@ function updateSquaresSolve(knlist) {
                 continue;
             }
             if (sq.innerText.length == 1) {
+                historyList.push({"square": sq.id, "set": sq.innerText});
                 sq.innerHTML = sq.innerText;
                 sq.classList.remove("note-holder");
             }
@@ -347,6 +373,7 @@ function searchForOnlyOptionSolve() {
                 if (nmbCount[i] == 1) {
                     if (foundSq[i] == null) continue;
                     foundSq[i].innerHTML = i+1;
+                    historyList.push({"square": foundSq[i].id, "set": i+1});
                     foundSq[i].classList.remove("note-holder");
                 }
             }
@@ -374,6 +401,7 @@ function searchForOnlyOptionSolve() {
             if (nmbCount[i] == 1) { 
                 if (foundSq[i] == null) continue;
                 foundSq[i].innerHTML = i+1;
+                historyList.push({"square": foundSq[i].id, "set": i+1});
                 foundSq[i].classList.remove("note-holder");
             }
         }
@@ -400,6 +428,7 @@ function searchForOnlyOptionSolve() {
             if (nmbCount[i] == 1) {
                 if (foundSq[i] == null) continue;
                 foundSq[i].innerHTML = i+1;
+                historyList.push({"square": foundSq[i].id, "set": i+1});
                 foundSq[i].classList.remove("note-holder");
             }
         }
@@ -408,7 +437,10 @@ function searchForOnlyOptionSolve() {
 
 }
 
-function solve() {
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
+
+async function solve() {
     let knlist = [];
 
     for (let x = 0; x < 9; x++) {
@@ -424,6 +456,9 @@ function solve() {
     }
 
     while (knlist.length != 9*9) {
+        await delay(10);
+
+
         let prevlength = knlist.length; 
         updateSquaresSolve(knlist);
         
@@ -441,27 +476,59 @@ function solve() {
         if (prevlength == knlist.length) {
             // No Sure Number Guess
             // Search for lowest entropy
-            let min = 10; let minSq;
+            let min = 10; let minSq = null;
             for (let x = 0; x < 9; x++) {
                 for (let y = 0; y < 9; y++) {
                     let sq = document.getElementById(`sq${x}x${y}`);
                     if (!sq.classList.contains("note-holder")) continue;
-                    if (sq.innerText.length < min) {
-                        min = sq.innerText.length;
+                    let options = sq.innerText.split("\n").filter((v, _, __) => v != ""); 
+                    if (options.length < min) {
+                        min = options.length;
                         minSq = sq;
                     }
                 }
             }
-            if (!minSq != null) {
-                console.table(knlist);
-                console.log(min);
-                alert("Error");
-                return;
+            if (minSq == null) {
+                // console.log("No min sq found");
+                // roll back
+                // go back to last random choice
+                let rb_succesfull = false;
+                while (historyList.length) {
+                    let element = historyList.pop();
+                    if (element["set"] == "Random" && element["from"].length < 2) {
+                        // found last random selection
+                        // select other possibilty
+                        let options = element["from"];
+                        options.remove(element["to"]);
+                        let sq = document.getElementById(element["square"]);
+                        sq.innerHTML = options[Math.floor(Math.random() * options.length)];
+                        historyList.push({"square": sq.id, "set": "Random", "from": options, "to": sq.innerHTML});
+                        rb_succesfull = true;
+                        break;
+                    } else {
+                        // reset any square modified after random choice
+                        let sq = document.getElementById(element["square"]);
+                        sq.innerHTML =
+                            "<p>1</p><p>2</p><p>3</p><p>4</p><p>5</p><p>6</p><p>7</p><p>8</p><p>9</p>";
+                        sq.classList.add("note-holder");
+                    }
+                }
+                if (!rb_succesfull) {
+                    alert("ERROR");
+                    return;
+                }
+
+            } else {
+                let options = minSq.innerText.split("\n").filter((v, _, __) => v != ""); 
+                minSq.innerHTML = options[Math.floor(Math.random() * min)];
+                // console.log("Choose", minSq.innerHTML);
+                historyList.push({"square": minSq.id, "set": "Random", "from": options, "to": minSq.innerText});
+                minSq.classList.remove("note-holder");
             }
-            console.log(minSq);
-            minSq.innerHTML = minSq.innerText.split("")[Math.floor(Math.random() * min)];
-            minSq.classList.remove("note-holder");
+
+
         }
+
 
         
         updateNumberCount();
@@ -470,11 +537,8 @@ function solve() {
 
 }
 
-
-
-
-
 document.getElementById("solveBtn").addEventListener("click", solve);
+
 
 
 resetAll();

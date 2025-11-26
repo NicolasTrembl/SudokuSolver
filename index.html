@@ -7,16 +7,15 @@
     <title>Wave Function Collapse Sudoku Solver</title>
 </head>
 <body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script defer src="script.js"></script>
     <!-- navbar / sidebar -->
     <main>
 
         <div class="title">
             <h1>
-                Wave function collapse sudoku solver 
+                WFC Sudoku Solver 
             </h1>
-            This tool <i>should</i> solve sudoku using the WFC algorithm. <br>
-            But first of all let's make a working sudoku game.
         </div>
     
     
@@ -144,77 +143,98 @@
         </div>
 
 
+        <div class="command-select">
+            <p id="cso-numb" class="command-select-option selected">Number</p>
+            <p id="cso-solv" class="command-select-option">Solver</p>
+        </div>
+        
+
         <div class="command-panel">
-            <div class="numpad">
-                <div class="number-display" id="nb1">
-                    <p>1</p>
-                    <p id="count_nb_1">9</p>
+
+            <div id="numpad-panel" class="numpad-panel">
+                <div class="numpad">
+                    <div class="number-display" id="nb1">
+                        <p>1</p>
+                        <p id="count_nb_1">9</p>
+                    </div>
+                    
+                    <div class="number-display" id="nb2">
+                        <p>2</p>
+                        <p id="count_nb_2">9</p>
+                    </div>
+                    
+                    <div class="number-display" id="nb3">
+                        <p>3</p>
+                        <p id="count_nb_3">9</p>
+                    </div>
+                    
+                    <div class="number-display" id="nb4">
+                        <p>4</p>
+                        <p id="count_nb_4">9</p>
+                    </div>
+                    
+                    <div class="number-display" id="nb5">
+                        <p>5</p>
+                        <p id="count_nb_5">9</p>
+                    </div>
+                    
+                    <div class="number-display" id="nb6">
+                        <p>6</p>
+                        <p id="count_nb_6">9</p>
+                    </div>
+                    
+                    <div class="number-display" id="nb7">
+                        <p>7</p>
+                        <p id="count_nb_7">9</p>
+                    </div>
+                    
+                    <div class="number-display" id="nb8">
+                        <p>8</p>
+                        <p id="count_nb_8">9</p>
+                    </div>
+                    
+                    <div class="number-display" id="nb9">
+                        <p>9</p>
+                        <p id="count_nb_9">9</p>
+                    </div>
                 </div>
-                
-                <div class="number-display" id="nb2">
-                    <p>2</p>
-                    <p id="count_nb_2">9</p>
-                </div>
-                
-                <div class="number-display" id="nb3">
-                    <p>3</p>
-                    <p id="count_nb_3">9</p>
-                </div>
-                
-                <div class="number-display" id="nb4">
-                    <p>4</p>
-                    <p id="count_nb_4">9</p>
-                </div>
-                
-                <div class="number-display" id="nb5">
-                    <p>5</p>
-                    <p id="count_nb_5">9</p>
-                </div>
-                
-                <div class="number-display" id="nb6">
-                    <p>6</p>
-                    <p id="count_nb_6">9</p>
-                </div>
-                
-                <div class="number-display" id="nb7">
-                    <p>7</p>
-                    <p id="count_nb_7">9</p>
-                </div>
-                
-                <div class="number-display" id="nb8">
-                    <p>8</p>
-                    <p id="count_nb_8">9</p>
-                </div>
-                
-                <div class="number-display" id="nb9">
-                    <p>9</p>
-                    <p id="count_nb_9">9</p>
+
+                <div id="mode-p" class="mode-panel" >
+                    <p>Mode</p>
+                    <div>
+                        <input type="radio" id="write" name="input_mode">
+                        <label for="write">Write</label>
+                        <br>
+                        <input type="radio" id="note" name="input_mode">
+                        <label for="note">Note</label>
+                        <br>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="toggleKN">
+                        <label for="toggleKN">Known Number</label>
+                        <br>
+                    </div>
+                    <div>
+                    <input type="button" value="Erase" id="eraseBtn">
+                    </div>
                 </div>
             </div>
 
-            <div class="mode-panel">
+            
+            <div id="solve-p" class="panel hidden">
+                <p>Control :</p>
                 <div>
-                    <input type="checkbox" id="toggleKN">
-                    <label for="toggleKN">Toggle Known Number</label>
-                    <br>
+                    <input type="button" value="Restart" id="restartBtn">
+                    <input type="button" value="Reset All" id="resetBtn">
                 </div>
+                <p>Solve :</p>
                 <div>
-                    <input type="radio" id="write" name="input_mode">
-                    <label for="write">Write</label>
-                    <br>
-                    <input type="radio" id="note" name="input_mode">
-                    <label for="note">Note</label>
-                    <br>
+                    <div>
+                        <!-- <input type="checkbox" id="toggleCAM">
+                        <label for="toggleCAM">Generate Video</label> -->
+                    </div>
+                    <input type="button" value="Solve" id="solveBtn">
                 </div>
-                <div>
-                <input type="button" value="Erase" id="eraseBtn">
-
-                </div>
-            </div>
-            <div class="">
-                <input type="button" value="Restart" id="restartBtn">
-                <input type="button" value="Solve" id="solveBtn">
-                <input type="button" value="Reset All" id="resetBtn">
             </div>
         </div>
 
