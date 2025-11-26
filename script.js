@@ -571,6 +571,7 @@ function restoreSudokuState(state) {
 async function solve() {
     historyList = [];
     let knlist = [];
+    document.body.style.backgroundColor = "slategrey";
 
     for (let x = 0; x < 9; x++) {
         for (let y = 0; y < 9; y++) {
