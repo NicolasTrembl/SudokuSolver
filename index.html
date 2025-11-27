@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+    <script src="https://docs.opencv.org/4.x/opencv.js"></script>
     <title data-txt-key="title">Wave Function Collapse Sudoku Solver</title>
 </head>
 <body>
@@ -223,6 +225,13 @@
                     <div>
                     <input data-txt-key="erase-btn" type="button" value="Erase" id="eraseBtn">
                     </div>
+                    <div>
+                        <p data-txt-key="ocrtitle">Scan a sudolu</p>
+                        <div>
+                            <input type="button" id="ocrUpload" data-txt-key="ocr-upload" value="Upload a sudoku">
+                            <input type="file" id="ocrInput" accept="image/*" style="display: none;">
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -241,10 +250,7 @@
                     </div> -->
                     <input data-txt-key="solve-btn" type="button" value="Solve" id="solveBtn">
                 </div>
-            </div>
-        </div>
-
-        
+            </div>        
     </main>    
     
 </body>

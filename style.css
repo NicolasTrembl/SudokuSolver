@@ -167,7 +167,7 @@ main {
     border-width: 1px;
     border-style: solid;
     justify-content: space-between;
-
+    gap: 6px;
 
 }
 

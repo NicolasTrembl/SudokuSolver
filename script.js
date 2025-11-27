@@ -254,7 +254,7 @@ function updateNumberCount() {
 
 
     if (checkSolved) {
-        if (checkForVictory()) document.body.style.backgroundColor = "green";
+        if (checkForVictory()) document.body.style.backgroundColor = "lightgreen";
     }
 
 }
@@ -728,6 +728,9 @@ const langMap = {
     "reset-btn": {"FR": "Réinitialiser", "EN": "Reset"},
     "solve": {"FR": "Résoudre :", "EN": "Solve:"},
     "solve-btn": {"FR": "Résoudre", "EN": "Solve"},
+    "ocrtitle": {"FR": "Scanner :", "EN": "Scan:"},
+    "ocr-upload": {"FR": "Charger un sudoku", "EN": "Upload a sudoku"},
+    "loading": {"FR": "Chargement...", "EN": "Loading..."}
 }
 
 function updateText(lang) {
@@ -762,6 +765,321 @@ document.getElementById("langFr").addEventListener("click", function() {
 document.getElementById("langEn").addEventListener("click", function() {
     localStorage.setItem("lang", "EN");
     updateText("EN");
+});
+
+
+// OCR IMPLEMENTATION FROM CLAUDE & GEMINI
+
+function findSudokuGrid(imageElement) {
+    if (!opencvReady || typeof cv === 'undefined') {
+        console.warn('OpenCV pas disponible, utilisation de la méthode simple');
+        return null;
+    }
+
+    try {
+        let src = cv.imread(imageElement);
+        let gray = new cv.Mat();
+        let blur = new cv.Mat();
+        let thresh = new cv.Mat();
+        
+        cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+        cv.GaussianBlur(gray, blur, new cv.Size(5, 5), 0);
+        cv.adaptiveThreshold(blur, thresh, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, 
+                            cv.THRESH_BINARY_INV, 11, 2);
+        
+        let contours = new cv.MatVector();
+        let hierarchy = new cv.Mat();
+        cv.findContours(thresh, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+        
+        let maxArea = 0;
+        let maxContourIndex = -1;
+        
+        for (let i = 0; i < contours.size(); i++) {
+            let contour = contours.get(i);
+            let area = cv.contourArea(contour);
+            if (area > maxArea) {
+                maxArea = area;
+                maxContourIndex = i;
+            }
+        }
+        
+        if (maxContourIndex === -1) {
+            throw new Error('Aucune grille trouvée');
+        }
+        
+        let maxContour = contours.get(maxContourIndex);
+        let peri = cv.arcLength(maxContour, true);
+        let approx = new cv.Mat();
+        cv.approxPolyDP(maxContour, approx, 0.02 * peri, true);
+        
+        let corners = [];
+        for (let i = 0; i < approx.rows; i++) {
+            corners.push({
+                x: approx.data32S[i * 2],
+                y: approx.data32S[i * 2 + 1]
+            });
+        }
+        
+        src.delete(); gray.delete(); blur.delete(); thresh.delete();
+        contours.delete(); hierarchy.delete(); maxContour.delete(); approx.delete();
+        
+        if (corners.length === 4) {
+            return sortCorners(corners);
+        }
+        
+        return null;
+    } catch (error) {
+        console.error('Erreur détection grille:', error);
+        return null;
+    }
+}
+
+function sortCorners(corners) {
+    let centerX = corners.reduce((sum, c) => sum + c.x, 0) / corners.length;
+    let centerY = corners.reduce((sum, c) => sum + c.y, 0) / corners.length;
+    
+    corners.sort((a, b) => {
+        let angleA = Math.atan2(a.y - centerY, a.x - centerX);
+        let angleB = Math.atan2(b.y - centerY, b.x - centerX);
+        return angleA - angleB;
+    });
+    
+    let topLeftIndex = 0;
+    let minDist = Infinity;
+    for (let i = 0; i < corners.length; i++) {
+        let dist = corners[i].x + corners[i].y;
+        if (dist < minDist) {
+            minDist = dist;
+            topLeftIndex = i;
+        }
+    }
+    
+    return [...corners.slice(topLeftIndex), ...corners.slice(0, topLeftIndex)];
+}
+
+function extractAndWarpGrid(imageElement, corners) {
+    if (!corners || !opencvReady || typeof cv === 'undefined') {
+        return imageElement;
+    }
+
+    try {
+        let src = cv.imread(imageElement);
+        let size = 450;
+        
+        let srcPoints = cv.matFromArray(4, 1, cv.CV_32FC2, [
+            corners[0].x, corners[0].y,
+            corners[1].x, corners[1].y,
+            corners[2].x, corners[2].y,
+            corners[3].x, corners[3].y
+        ]);
+        
+        let dstPoints = cv.matFromArray(4, 1, cv.CV_32FC2, [
+            0, 0,
+            size, 0,
+            size, size,
+            0, size
+        ]);
+        
+        let M = cv.getPerspectiveTransform(srcPoints, dstPoints);
+        let warped = new cv.Mat();
+        cv.warpPerspective(src, warped, M, new cv.Size(size, size));
+        
+        let canvas = document.createElement('canvas');
+        cv.imshow(canvas, warped);
+        
+        src.delete(); srcPoints.delete(); dstPoints.delete(); M.delete(); warped.delete();
+        
+        return canvas;
+    } catch (error) {
+        console.error('Erreur redressement:', error);
+        return imageElement;
+    }
+}
+
+function extractCells(gridCanvas) {
+    const cellSize = gridCanvas.width / 9;
+    const cells = [];
+    
+    for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+            const cellCanvas = document.createElement('canvas');
+            const margin = cellSize * 0.15;
+            const innerSize = cellSize - (2 * margin);
+            
+            cellCanvas.width = innerSize;
+            cellCanvas.height = innerSize;
+            
+            const ctx = cellCanvas.getContext('2d');
+            
+            ctx.drawImage(
+                gridCanvas,
+                col * cellSize + margin, row * cellSize + margin,
+                innerSize, innerSize,
+                0, 0,
+                innerSize, innerSize
+            );
+            
+            const imageData = ctx.getImageData(0, 0, innerSize, innerSize);
+            const data = imageData.data;
+            
+            let pixelCount = 0;
+            let darkPixels = 0;
+            
+            for (let i = 0; i < data.length; i += 4) {
+                const gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+                const threshold = gray < 128 ? 0 : 255;
+                data[i] = data[i + 1] = data[i + 2] = threshold;
+                
+                pixelCount++;
+                if (threshold === 0) darkPixels++;
+            }
+            
+            ctx.putImageData(imageData, 0, 0);
+            
+            const darkRatio = darkPixels / pixelCount;
+            const isEmpty = darkRatio < 0.05;
+            
+            cells.push({
+                canvas: cellCanvas,
+                row: row,
+                col: col,
+                isEmpty: isEmpty
+            });
+        }
+    }
+    
+    return cells;
+}
+
+async function recognizeCell(cellCanvas) {    
+    try {
+        const blob = await new Promise(resolve => cellCanvas.toBlob(resolve));
+        
+        const worker = await Tesseract.createWorker('eng');
+        
+        await worker.setParameters({
+            tessedit_char_whitelist: '123456789',
+            tessedit_pageseg_mode: Tesseract.PSM.SINGLE_CHAR,
+        });
+        
+        const { data: { text, confidence } } = await worker.recognize(blob);
+        await worker.terminate();
+        const digit = text.trim();
+        if (confidence < 50 || !digit || !/[1-9]/.test(digit)) {
+            return '0';
+        }
+        
+        return digit[0];
+    } catch (error) {
+        console.error('Erreur reconnaissance cellule:', error);
+        return '0';
+    }
+}
+
+async function extractSudokuFromImage(imageFile) {
+    try {
+        const img = await loadImageFromFile(imageFile);
+        const corners = findSudokuGrid(img);        
+        const gridCanvas = corners ? extractAndWarpGrid(img, corners) : await imageToCanvas(img);        
+        const cells = extractCells(gridCanvas);
+        
+        
+        const grid = [];
+        
+        const recognitionPromises = cells.map(cell => {
+            if (cell.isEmpty) {
+                return Promise.resolve('0');
+            } else {
+                return recognizeCell(cell.canvas, false).then(digit => {
+                    console.log(`Cell (${cell.col}, ${cell.row}) found: ${digit}`);
+                    return digit;
+                });
+            }
+        });
+
+        const digits = await Promise.all(recognitionPromises);
+        
+        grid.push(...digits);
+        
+        
+        return grid;
+        
+    } catch (error) {
+        console.error('ERROR:', error);
+        throw error;
+    }
+}
+
+function loadImageFromFile(file) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = URL.createObjectURL(file);
+    });
+}
+
+async function imageToCanvas(img) {
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    return canvas;
+}
+
+function loadSudokuToGrid(grid) {
+    if (grid.length !== 81) {
+        return false;
+    }
+
+    resetAll();
+
+    KNtoggled = true;
+    knBtn.checked = true;
+
+    let index = 0;
+    for (let y = 0; y < 9; y++) {
+        for (let x = 0; x < 9; x++) {
+            let value = parseInt(grid[index]);
+            if (value >= 1 && value <= 9) {
+                updateSquare(x, y, value);
+            }
+            index++;
+        }
+    }
+
+    KNtoggled = false;
+    knBtn.checked = false;
+
+    return true;
+}
+
+document.getElementById('ocrUpload')?.addEventListener('click', function() {
+    document.getElementById('ocrInput').click();
+});
+
+document.getElementById('ocrInput')?.addEventListener('change', async function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    console.log(document.documentElement.lang.toUpperCase());
+
+    document.getElementById('ocrUpload').value = langMap["loading"][document.documentElement.lang.toUpperCase()];
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    try {
+        const grid = await extractSudokuFromImage(file);
+        console.log(grid);
+        loadSudokuToGrid(grid);
+    } catch (error) {
+        console.error('Erreur:', error);
+    }    
+    document.getElementById('ocrUpload').value = langMap["ocr-upload"][document.documentElement.lang.toUpperCase()];
+
+    e.target.value = '';
 });
 
 
