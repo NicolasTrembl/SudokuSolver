@@ -770,6 +770,17 @@ document.getElementById("langEn").addEventListener("click", function() {
 
 // OCR IMPLEMENTATION FROM CLAUDE & GEMINI
 
+let opencvReady = false;
+if (typeof cv !== 'undefined') {
+    opencvReady = true;
+} else {
+    console.log("No opencv");
+    const script = document.createElement('script');
+    script.src = 'https://docs.opencv.org/4.x/opencv.js';
+    script.onload = () => { opencvReady = true; };
+    document.head.appendChild(script);
+}
+
 function findSudokuGrid(imageElement) {
     if (!opencvReady || typeof cv === 'undefined') {
         console.warn('OpenCV pas disponible, utilisation de la méthode simple');
