@@ -730,7 +730,10 @@ const langMap = {
     "solve-btn": {"FR": "Résoudre", "EN": "Solve"},
     "ocrtitle": {"FR": "Scanner :", "EN": "Scan:"},
     "ocr-upload": {"FR": "Charger un sudoku", "EN": "Upload a sudoku"},
-    "loading": {"FR": "Chargement...", "EN": "Loading..."}
+    "loading": {"FR": "Chargement...", "EN": "Loading..."},
+    "how2use": {"FR": "Comment utiliser cet outil :", "EN": "How to use this tool:"},
+    "explanation": {"FR": "Explication", "EN": "Explanation"},
+    "ok-btn": {"FR": "Ok", "EN": "Ok"},
 }
 
 function updateText(lang) {
@@ -795,8 +798,10 @@ function findSudokuGrid(imageElement) {
         
         cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
         cv.GaussianBlur(gray, blur, new cv.Size(5, 5), 0);
-        cv.adaptiveThreshold(blur, thresh, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, 
-                            cv.THRESH_BINARY_INV, 11, 2);
+        cv.adaptiveThreshold(
+            blur, thresh, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, 
+            cv.THRESH_BINARY_INV, 11, 2
+        );
         
         let contours = new cv.MatVector();
         let hierarchy = new cv.Mat();
@@ -1094,7 +1099,25 @@ document.getElementById('ocrInput')?.addEventListener('change', async function(e
 });
 
 
+function displayHelp(){
+    document.querySelector("main").classList.add("blur");
+    document.getElementById("help-modal").classList.remove("fhidden");
+}
+
+document.getElementById("help").addEventListener("click", displayHelp);
+document.getElementById("ok").addEventListener("click", function (){
+    document.querySelector("main").classList.remove("blur");
+    document.getElementById("help-modal").classList.add("fhidden");
+    localStorage.setItem("helpMessageSeen", true);
+});
 
 resetAll();
-
 updateText(detectLang());
+
+let helpSeen = localStorage.getItem("helpMessageSeen");
+
+if (helpSeen) {
+    console.log("Seen");
+} else {
+    displayHelp();
+}
