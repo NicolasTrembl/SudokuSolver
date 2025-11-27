@@ -4,20 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <title>Wave Function Collapse Sudoku Solver</title>
+    <title data-txt-key="title">Wave Function Collapse Sudoku Solver</title>
 </head>
 <body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script defer src="script.js"></script>
     <!-- navbar / sidebar -->
+    <nav>
+        <h1 data-txt-key="h1">
+            WFC Sudoku Solver 
+        </h1>
+        <div class="nav-actions">
+            <p id="help">?</p>
+            <div class="lang-select">
+                <p id="langFr">🇫🇷</p>
+                /
+                <p id="langEn">🏴󠁧󠁢󠁥󠁮󠁧󠁿</p>
+            </div>
+        </div>
+    </nav>
     <main>
 
-        <div class="title">
-            <h1>
-                WFC Sudoku Solver 
-            </h1>
-        </div>
-    
     
         <div class="sudoku-holder container-9x9">
             <div class="sudoku-big-square container-9x9">
@@ -144,8 +150,8 @@
 
 
         <div class="command-select">
-            <p id="cso-numb" class="command-select-option selected">Number</p>
-            <p id="cso-solv" class="command-select-option">Solver</p>
+            <p data-txt-key="number" id="cso-numb" class="command-select-option selected">Number</p>
+            <p data-txt-key="solver" id="cso-solv" class="command-select-option">Solver</p>
         </div>
         
 
@@ -200,40 +206,40 @@
                 </div>
 
                 <div id="mode-p" class="mode-panel" >
-                    <p>Mode</p>
+                    <p data-txt-key="mode">Mode</p>
                     <div>
                         <input type="radio" id="write" name="input_mode">
-                        <label for="write">Write</label>
+                        <label data-txt-key="write" for="write">Write</label>
                         <br>
                         <input type="radio" id="note" name="input_mode">
-                        <label for="note">Note</label>
+                        <label data-txt-key="note" for="note">Note</label>
                         <br>
                     </div>
                     <div>
                         <input type="checkbox" id="toggleKN">
-                        <label for="toggleKN">Known Number</label>
+                        <label data-txt-key="knnumber" for="toggleKN">Known Number</label>
                         <br>
                     </div>
                     <div>
-                    <input type="button" value="Erase" id="eraseBtn">
+                    <input data-txt-key="erase-btn" type="button" value="Erase" id="eraseBtn">
                     </div>
                 </div>
             </div>
 
             
             <div id="solve-p" class="panel hidden">
-                <p>Control :</p>
+                <p data-txt-key="control">Control :</p>
                 <div>
-                    <input type="button" value="Restart" id="restartBtn">
-                    <input type="button" value="Reset All" id="resetBtn">
+                    <input data-txt-key="restart-btn" type="button" value="Restart" id="restartBtn">
+                    <input data-txt-key="reset-btn" type="button" value="Reset All" id="resetBtn">
                 </div>
-                <p>Solve :</p>
+                <p data-txt-key="solve">Solve :</p>
                 <div>
                     <!-- <div>
                         <input type="checkbox" id="toggleCAM">
                         <label for="toggleCAM">Generate Video</label>
                     </div> -->
-                    <input type="button" value="Solve" id="solveBtn">
+                    <input data-txt-key="solve-btn" type="button" value="Solve" id="solveBtn">
                 </div>
             </div>
         </div>

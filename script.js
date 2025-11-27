@@ -712,7 +712,60 @@ async function solve() {
 
 document.getElementById("solveBtn").addEventListener("click", solve);
 
+const langMap = {
+    "title": {"FR": "Solveur de Sudoku", "EN": "Sudoku Solver"},
+    "h1": {"FR": "WFC Solveur de Sudoku", "EN": "WFC Sudoku Solver"},
+    "number": {"FR": "Nombre", "EN": "Number"},
+    "solver": {"FR": "Solveur", "EN": "Solver"},
+    "mode": {"FR": "Mode", "EN": "Mode"},
+    "write": {"FR": "Écrire", "EN": "Write"},
+    "note": {"FR": "Note", "EN": "Note"},
+    "knnumber": {"FR": "Chiffre Connu", "EN": "Known Number"},
+    "knnumber": {"FR": "Chiffre Connu", "EN": "Known Number"},
+    "erase-btn": {"FR": "Éffacer", "EN": "Erase"},
+    "control": {"FR": "Controles :", "EN": "Controls:"},
+    "restart-btn": {"FR": "Recommencer", "EN": "Restart"},
+    "reset-btn": {"FR": "Réinitialiser", "EN": "Reset"},
+    "solve": {"FR": "Résoudre :", "EN": "Solve:"},
+    "solve-btn": {"FR": "Résoudre", "EN": "Solve"},
+}
+
+function updateText(lang) {
+    document.documentElement.lang = lang.toLowerCase();
+    let langText = document.querySelectorAll("[data-txt-key]");
+    langText.forEach(function (e) {
+        if (e.getAttribute("data-txt-key").split("-").length > 1) {
+            // btn
+            e.value = langMap[e.getAttribute("data-txt-key")][lang];
+        } else {
+            e.innerText = langMap[e.getAttribute("data-txt-key")][lang];
+        }
+    });
+}
+
+function detectLang() {
+    let lang = localStorage.getItem("lang");
+    if (lang != null) {
+        return lang;
+    } 
+    if (Intl.DateTimeFormat().resolvedOptions().timeZone == "Europe/Paris") {
+        return "FR";
+    } 
+    return "EN";
+}
+
+document.getElementById("langFr").addEventListener("click", function() {
+    localStorage.setItem("lang", "FR");
+    updateText("FR");
+});
+
+document.getElementById("langEn").addEventListener("click", function() {
+    localStorage.setItem("lang", "EN");
+    updateText("EN");
+});
+
 
 
 resetAll();
 
+updateText(detectLang());
