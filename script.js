@@ -732,7 +732,7 @@ const langMap = {
     "ocr-upload": {"FR": "Charger un sudoku", "EN": "Upload a sudoku"},
     "loading": {"FR": "Chargement...", "EN": "Loading..."},
     "how2use": {"FR": "Comment utiliser cet outil :", "EN": "How to use this tool:"},
-    "explanation": {"FR": "Explication", "EN": "Explanation"},
+    "explanation": {"FR": "Utiliser les 'chiffres connus' pour définir les cases de départ du sudoku et résolvez-le vous même ou avec le solveur.", "EN": "Use the 'Known Word' to create the sudoku starting cell and solve it yourself or with the solver."},
     "ok-btn": {"FR": "Ok", "EN": "Ok"},
 }
 
